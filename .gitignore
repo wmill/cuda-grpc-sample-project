@@ -1,0 +1,4 @@
+*.o
+gen/
+sample_client
+sample_server

@@ -16,19 +16,19 @@ vpath %.proto $(PROTOS_PATH)
 
 all: system-check sample_client sample_server
 
-sample_client: sample.pb.o sample.grpc.pb.o sample_client.o
+sample_client: gen/sample.pb.o gen/sample.grpc.pb.o sample_client.o
 	$(CXX) $^ $(LDFLAGS) -o $@
 
-sample_server: sample.pb.o sample.grpc.pb.o sample_server.o
+sample_server: gen/sample.pb.o gen/sample.grpc.pb.o sample_server.o
 	$(CXX) $^ $(LDFLAGS) -o $@
 
 .PRECIOUS: %.grpc.pb.cc
-%.grpc.pb.cc: %.proto
-	$(PROTOC) -I $(PROTOS_PATH) --grpc_out=. --plugin=protoc-gen-grpc=$(GRPC_CPP_PLUGIN_PATH) $<
+gen/%.grpc.pb.cc: %.proto
+	$(PROTOC) -I $(PROTOS_PATH) --grpc_out=gen --plugin=protoc-gen-grpc=$(GRPC_CPP_PLUGIN_PATH) $<
 
 .PRECIOUS: %.pb.cc
-%.pb.cc: %.proto
-	$(PROTOC) -I $(PROTOS_PATH) --cpp_out=. $<
+gen/%.pb.cc: %.proto
+	$(PROTOC) -I $(PROTOS_PATH) --cpp_out=gen $<
 
 clean:
 	rm -f *.o *.pb.cc *.pb.h gen/* sample_client sample_server

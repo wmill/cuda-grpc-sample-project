@@ -12,6 +12,7 @@ using grpc::ServerContext;
 using grpc::Status;
 
 #include "gen/sample.grpc.pb.h"
+#include "cuda_calls.h"
 
 using cudasample::BoopReply;
 using cudasample::BoopRequest;
@@ -25,6 +26,8 @@ class GreeterServiceImpl final : public Greeter::Service {
                   BoopReply* reply) override {
     std::string prefix("Boop ");
     reply->set_message(prefix + request->name());
+    // do cuda stuff
+    cuda_calls();
     return Status::OK;
   }
 };

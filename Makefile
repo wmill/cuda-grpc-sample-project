@@ -1,10 +1,11 @@
 CXX = g++
+NVCXX = nvcc
 CPPFLAGS += `pkg-config --cflags protobuf grpc`
 CXXFLAGS += -std=c++11
 LDFLAGS += -L/usr/local/lib `pkg-config --libs protobuf grpc++`\
            -pthread\
            -Wl,--no-as-needed -lgrpc++_reflection -Wl,--as-needed\
-           -ldl
+           -ldl -lcuda -lcudart -L/usr/local/cuda/lib64
 
 PROTOC = protoc
 GRPC_CPP_PLUGIN = grpc_cpp_plugin
@@ -14,13 +15,22 @@ PROTOS_PATH = proto
 
 vpath %.proto $(PROTOS_PATH)
 
-all: system-check sample_client sample_server
+all: system-check sample_server
 
-sample_client: gen/sample.pb.o gen/sample.grpc.pb.o sample_client.o
+# sample_client: gen/sample.pb.o gen/sample.grpc.pb.o sample_client.o
+# 	$(CXX) $^ $(LDFLAGS) -o $@
+
+sample_server: gen/sample.pb.o gen/sample.grpc.pb.o sample_server.o cuda_calls.o
 	$(CXX) $^ $(LDFLAGS) -o $@
 
-sample_server: gen/sample.pb.o gen/sample.grpc.pb.o sample_server.o
-	$(CXX) $^ $(LDFLAGS) -o $@
+cuda_calls.o: cuda_calls.cu
+	$(NVCXX) $< -c -o $@
+
+gen/%.o: gen/%.cc
+	$(CXX) $< $(CPPFLAGS) $(CXXFLAGS) -c -o $@
+
+sample_server.o: sample_server.cc
+	$(CXX) $< $(CPPFLAGS) $(CXXFLAGS) -c -o $@
 
 .PRECIOUS: %.grpc.pb.cc
 gen/%.grpc.pb.cc: %.proto

@@ -17,9 +17,6 @@ vpath %.proto $(PROTOS_PATH)
 
 all: system-check sample_server
 
-# sample_client: gen/sample.pb.o gen/sample.grpc.pb.o sample_client.o
-# 	$(CXX) $^ $(LDFLAGS) -o $@
-
 sample_server: gen/sample.pb.o gen/sample.grpc.pb.o sample_server.o cuda_calls.o
 	$(CXX) $^ $(LDFLAGS) -o $@
 
